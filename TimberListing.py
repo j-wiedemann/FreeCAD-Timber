@@ -26,6 +26,9 @@
 #*   Jonathan Wiedemann 2015                                               *
 #***************************************************************************/
 
+# Timber listing should be done with Selected objects, Tag (with different filter need a filter function)
+#
+
 __title__="FreeCAD Timber API"
 __author__ = "Jonathan Wiedemann"
 __url__ = "http://www.freecadweb.org"
@@ -39,11 +42,11 @@ from PySide import QtCore, QtGui
 import os
 __dir__ = os.path.dirname(__file__)
 
-def makeTimberListing(display=True):
-    tb = Listing()
+def makeTimberListing(objs, export):
+    tb = Listing(objs, export)
     tb.makeTimberList()
-    if display:
-        tb.printTimberList()
+    #if display:
+    tb.printTimberList()
     #return tb.getTimberList()
 
 def getTagList():
@@ -56,6 +59,49 @@ def getTagList():
         except AttributeError:
             pass
     return taglist
+
+def listingfilter(items):
+    doc = FreeCAD.ActiveDocument
+    objs = doc.Objects
+    objlist = []
+    for item in items :
+        if item == "Selection":
+            for obj in FreeCADGui.Selection.getSelection() :
+                objlist.append(obj)
+        taglist = getTagList()
+        for tag in taglist :
+            if item == tag :
+                for obj in objs:
+                    #a = obj.Name
+                    #print("Objet : " + str(a))
+                    #b = obj.Label
+                    if hasattr(obj,"Proxy"):
+                        #print(" - hasattr Proxy : ok")
+                        if hasattr(obj.Proxy,"Type"):
+                            #print(" - hasattr Type : ok")
+                            if FreeCADGui.ActiveDocument.getObject(obj.Name).Visibility :
+                                #print(" - Visibility : True")
+                                try:
+                                    if obj.Tag == item :
+                                        objlist.append(obj)
+                                except AttributeError:
+                                    pass
+                                #Listing()
+                                #objectAnalyse(obj)
+                            else:
+                                #print(" - Visibility : False")
+                                pass
+                        else:
+                            #print(" - hasattr Type : no")
+                            pass
+                    else:
+                        #print(" - hasattr Proxy : no")
+                        pass
+    s = []
+    for i in objlist:
+        if i not in s:
+            s.append(i)
+    return s
 
 class _CommandListing:
         "the Timber Listing command definition"
@@ -79,105 +125,101 @@ class _ListingTaskPanel:
         self.grid.setObjectName("grid")
         self.title = QtGui.QLabel(self.form)
         self.grid.addWidget(self.title, 1, 0)
+        self.textobjlist = QtGui.QLabel(self.form)
+        self.grid.addWidget(self.textobjlist, 1, 1)
+
         self.taglistwidget = QtGui.QListWidget(self.form)
+        self.taglistwidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        #QtGui.QAbstractItemView([parent=self.taglistwidget])
         self.grid.addWidget(self.taglistwidget, 2, 0)
+        self.taglistwidget.addItem("Selection")
         for tag in getTagList():
             self.taglistwidget.addItem(tag)
+        self.filteredlistwidget = QtGui.QListWidget(self.form)
+        self.grid.addWidget(self.filteredlistwidget, 2, 1)
         self.infoText =  QtGui.QLabel(self.form)
         self.grid.addWidget(self.infoText, 3, 0)
-        self.combobox = QtGui.QComboBox()
-        self.combobox.setCurrentIndex(0)
-        self.grid.addWidget(self.combobox, 3, 1)
-        #self.linedit = QtGui.QLineEdit()
-        #self.combobox.setCurrentIndex(0)
-        #self.grid.addWidget(self.linedit, 3, 1)
-        #self.taglistwidget.itemClicked.connect(self.setTag)
-        #QtCore.QObject.connect(self.taglistwidget,QtCore.SIGNAL("itemClicked(item)"),self.setTag)
-        #self.previewObj = FreeCAD.ActiveDocument.addObject("Part::Feature", str(translate("Arch", "PreviewCutVolume")))
+        self.checkSpreadsheet = QtGui.QCheckBox(self.form)
+        self.checkShape = QtGui.QCheckBox(self.form)
+        self.grid.addWidget(self.checkSpreadsheet, 4, 0)
+        self.grid.addWidget(self.checkShape, 4, 1)
+
+        QtCore.QObject.connect(self.taglistwidget,QtCore.SIGNAL("itemSelectionChanged()"),self.makeFiltered)
+
         self.retranslateUi(self.form)
-        #self.previewCutVolume(self.combobox.currentIndex())
 
-    def setTag(self,item):
-        #print "setText"
-        self.linedit.setText(str(item.text()))
-
-    #def printTimberList(self):
-        #pass
+    def makeFiltered(self):
+        items = []
+        for item in self.taglistwidget.selectedItems():
+            items.append(item.text())
+        print items
+        objlist = listingfilter(items)
+        self.filteredlistwidget.clear()
+        for obj in objlist:
+            self.filteredlistwidget.addItem(obj.Label)
 
     def accept(self):
-        #FreeCAD.ActiveDocument.removeObject(self.previewObj.Name)
-        #destination = str(self.combobox.currentItem.text())
-        #tag = self.linedit.text()
-        #print makeTimberListing(tag,destination)
-        makeTimberListing()
-        #FreeCAD.ActiveDocument.recompute()
+        items = []
+        export = []
+        for item in self.taglistwidget.selectedItems():
+            items.append(item.text())
+        print items
+        objlist = listingfilter(items)
+        if self.checkSpreadsheet.isChecked() :
+            export.append("Spreadsheet")
+        if self.checkShape.isChecked() :
+            export.append("Shape")
+        makeTimberListing(objlist,export)
         return True
 
     def reject(self):
-        FreeCAD.Console.PrintMessage("Cancel Listing\n")
+        FreeCAD.Console.PrintMessage("Cancel Timber Listing\n")
         return True
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Ok|QtGui.QDialogButtonBox.Cancel)
 
     def retranslateUi(self, TaskPanel):
-        TaskPanel.setWindowTitle(QtGui.QApplication.translate("Timber", "Listing", None, QtGui.QApplication.UnicodeUTF8))
-        self.title.setText(QtGui.QApplication.translate("Timber", "Choose tag to list", None, QtGui.QApplication.UnicodeUTF8))
-        self.infoText.setText(QtGui.QApplication.translate("Timber", "Destination", None, QtGui.QApplication.UnicodeUTF8))
-        self.combobox.addItems([QtGui.QApplication.translate("Timber", "Window", None, QtGui.QApplication.UnicodeUTF8),
-                                    QtGui.QApplication.translate("Timber", "Report View", None, QtGui.QApplication.UnicodeUTF8),
-                                    QtGui.QApplication.translate("Timber", "Spreadsheet", None, QtGui.QApplication.UnicodeUTF8),
-                                    QtGui.QApplication.translate("Timber", "CuttingStock .dat", None, QtGui.QApplication.UnicodeUTF8)])
+        TaskPanel.setWindowTitle(QtGui.QApplication.translate("Timber", "Timber Listing", None, QtGui.QApplication.UnicodeUTF8))
+        self.title.setText(QtGui.QApplication.translate("Timber", "Press Ctrl to multiple selection", None, QtGui.QApplication.UnicodeUTF8))
+        self.textobjlist.setText(QtGui.QApplication.translate("Timber", "Objects to be listed", None, QtGui.QApplication.UnicodeUTF8))
+        self.infoText.setText(QtGui.QApplication.translate("Timber", "Export", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkSpreadsheet.setText(QtGui.QApplication.translate("Timber", "Make Spreadsheet", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkShape.setText(QtGui.QApplication.translate("Timber", "Make aligned shapes", None, QtGui.QApplication.UnicodeUTF8))
 
-class Listing:
-    def __init__(self):
-        doc = FreeCAD.ActiveDocument
-        objs = FreeCAD.ActiveDocument.Objects
-        self.objlist=[]
-        #print("Il y a "+str(len(objs))+" objets dans le document.")
-        for obj in objs:
-            #a = obj.Name
-            #print("Objet : " + str(a))
-            #b = obj.Label
-            if hasattr(obj,"Proxy"):
-                #print(" - hasattr Proxy : ok")
-                if hasattr(obj.Proxy,"Type"):
-                    #print(" - hasattr Type : ok")
-                    if FreeCADGui.ActiveDocument.getObject(obj.Name).Visibility :
-                        #print(" - Visibility : True")
-                        try:
-                            if obj.Tag:
-                                self.objlist.append(obj)
-                        except AttributeError:
-                            pass
-                        #Listing()
-                        #objectAnalyse(obj)
-                    else:
-                        #print(" - Visibility : False")
-                        pass
-                else:
-                    #print(" - hasattr Type : no")
-                    pass
-            else:
-                #print(" - hasattr Proxy : no")
-                pass
-
+class Listing():
+    def __init__(self, objs, export):
+        self.objlist=objs
+        self.export = export
         parms = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Units")
+        # tag list = timberlist[0]
+        # section list timberlist[0][0]
+        # debit list timberlist[0][0][0]
+        # [ [ Tag , [ [ base , hauteur ] , [ [ debit , quantite ], ], ] ] , ]
         self.timberlist=[]
 
     def makeTimberList(self):
-        for tag in getTagList():
-            timberlistbytag = []
-            for obj in self.objlist:
-                if obj.Tag == tag:
-                    if obj.Proxy.Type in ["Structure", "Panel", "StructuralSystem", "Frame"]:
-                        for solid in obj.Shape.Solids:
-                            name = str("Aligned_"+str(obj.Name))
-                            timber_part = self.shapeAnalyse(name,solid,)
-                            timberlistbytag = self.addListe(timberlistbytag, timber_part[0], timber_part[1], timber_part[2])
-                    else :
-                        print("Type structurel non pris en charge")
-            self.timberlist.append([tag,timberlistbytag])
+        #for tag in getTagList():
+        timberlistbytag = []
+        #for each object in objlist
+        for obj in self.objlist:
+            # if tag object match a tag in taglist
+            if hasattr(obj,"Tag"):
+                if obj.Tag in getTagList():
+                    tag = obj.Tag
+                else :
+                    tag = "NoTag"
+            else :
+                tag = "NoTag"
+                #for solids in object
+            for solid in obj.Shape.Solids:
+                # set a name for shape analyse
+                name = str("Aligned_"+str(obj.Name))
+                # make shape analyse boundbox aligned
+                timber_part = self.shapeAnalyse(name,solid,)
+                # add analyse to list
+                timberlistbytag = self.addListe(tag, timber_part[0], timber_part[1], timber_part[2])
+        #self.timberlist.append([tag,timberlistbytag])
         return self.timberlist
 
     def getTimberList():
@@ -193,11 +235,15 @@ class Listing:
                 for debit in section[2]:
                     print(str(debit[1])+"      "+str(debit[0]))
             print("")
-        if hasattr(FreeCAD.ActiveDocument,"TimberSpeadsheet"):
-            mySheet = FreeCAD.ActiveDocument.TimberSpreadsheet
-        else :
-            mySheet = FreeCAD.ActiveDocument.addObject('Spreadsheet::Sheet','TimberSpreadsheet')
-        mySheet.clearAll()
+        #if hasattr(FreeCAD.ActiveDocument,"TimberSpeadsheet"):
+        #    mySheet = FreeCAD.ActiveDocument.TimberSpreadsheet
+        #else :
+        if "Spreadsheet" in self.export:
+            makeSpreadsheet()
+
+    def makeSpreadsheet(self):
+        mySheet = FreeCAD.ActiveDocument.addObject('Spreadsheet::Sheet','TimberSpreadsheet')
+        #mySheet.clearAll()
         FreeCAD.ActiveDocument.recompute()
         mySheet.set('A1', 'Liste')
         n=1
@@ -228,8 +274,9 @@ class Listing:
                     #print(str(debit[1])+"      "+str(debit[0]))
             #print("")
             FreeCAD.ActiveDocument.recompute()
+    #def getTaginList(self):
 
-    def addListe(self, listbytag, base, hauteur, longueur):
+    def addListe(self, tag, base, hauteur, longueur):
         #precision = parms.GetInt('Decimals')
         precision = 0
         base = round(base,precision)
@@ -243,10 +290,31 @@ class Listing:
         hauteur = liste[1]
         longueur = liste[2]
         #print "self.timberlist : ,",self.timberlist
+        # By default object is not added
         added = False
-        if len(listbytag) > 0 :
+        # Init taglist : list of tags present in self.timberlist
+        taglist=[]
+        # If current object tag is present add analyse in this taglist
+        # else create a tag list with analyse
+        idx = -1
+        n = 0
+        if len(self.timberlist) > 0:
+            for tagslist in self.timberlist :
+                #print tag,tagslist[0]
+                if tagslist[0] == tag :
+                    listbytag = tagslist[1]
+                    idx = n
+                n += 1
+            if idx == -1 :
+                self.timberlist.append([tag,[]])
+                idx = -1
+        else :
+            self.timberlist.append([tag,[]])
+            idx = -1
+        #print(self.timberlist)
+        if len(self.timberlist[idx][1]) > 0 :
             #print "self.timberlist est > 0"
-            for x in listbytag :
+            for x in self.timberlist[idx][1] :
                 if x[0]==base and x[1]==hauteur :
                     #print "la section existe"
                     for qte in x[2]:
@@ -262,12 +330,12 @@ class Listing:
             if not added:    #else:
                 #print "la section existe pas"
                 #print "ajout section , longueur, qte"
-                listbytag.append([base, hauteur,[[longueur,1],],])
+                self.timberlist[idx][1].append([base, hauteur,[[longueur,1],],])
         else:
             #print "la liste est vide"
             #print "ajout section , longueur, qte"
-            listbytag.append([base, hauteur,[[longueur,1],],])
-        return listbytag
+            self.timberlist[idx][1].append([base, hauteur,[[longueur,1],],])
+        return self.timberlist
         #print "self.timberlist : ,",self.timberlist
 
     def getArea(self, face):
@@ -332,7 +400,10 @@ class Listing:
         Draft.rotate([obj],rotZ,pos2,axis=zv,copy=False)
         FreeCAD.ActiveDocument.recompute()
         ## Get the boundbox
-        return [obj.Shape.BoundBox.YLength, obj.Shape.BoundBox.ZLength, obj.Shape.BoundBox.XLength]
+        analyse = [obj.Shape.BoundBox.YLength, obj.Shape.BoundBox.ZLength, obj.Shape.BoundBox.XLength]
+        if not "Shape" in self.export :
+            FreeCAD.ActiveDocument.removeObject(name)
+        return analyse
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Timber_Listing',_CommandListing())

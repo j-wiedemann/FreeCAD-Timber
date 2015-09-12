@@ -152,7 +152,7 @@ class _ListingTaskPanel:
         items = []
         for item in self.taglistwidget.selectedItems():
             items.append(item.text())
-        print items
+        #print items
         objlist = listingfilter(items)
         self.filteredlistwidget.clear()
         for obj in objlist:
@@ -239,7 +239,7 @@ class Listing():
         #    mySheet = FreeCAD.ActiveDocument.TimberSpreadsheet
         #else :
         if "Spreadsheet" in self.export:
-            makeSpreadsheet()
+            self.makeSpreadsheet()
 
     def makeSpreadsheet(self):
         mySheet = FreeCAD.ActiveDocument.addObject('Spreadsheet::Sheet','TimberSpreadsheet')
@@ -398,6 +398,11 @@ class Listing():
         pos2 = obj.Placement.Base
         rotZ = math.degrees(DraftVecUtils.angle(vecZ,FreeCAD.Vector(1.0,0.0,0.0),zv))
         Draft.rotate([obj],rotZ,pos2,axis=zv,copy=False)
+        bb = obj.Shape.BoundBox
+        movex = bb.XMin*-1
+        movey = bb.YMin*-1
+        movez = bb.ZMin*-1
+        Draft.move([obj], FreeCAD.Vector(movex, movey, movez))
         FreeCAD.ActiveDocument.recompute()
         ## Get the boundbox
         analyse = [obj.Shape.BoundBox.YLength, obj.Shape.BoundBox.ZLength, obj.Shape.BoundBox.XLength]

@@ -36,3 +36,4 @@ if FreeCAD.GuiUp:
 	FreeCADGui.updateLocale()
 
 from TimberTools import *
+from TimberListing import *

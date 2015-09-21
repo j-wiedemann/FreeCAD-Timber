@@ -62,10 +62,15 @@ static char * infologo_xpm[] = {
         #self.appendMenu('TimberTools',['Timber_Tag','Timber_List'])
         self.appendToolbar('TimberTools',['Timber_Repartition','Timber_Tag'])
         self.appendToolbar('TimberListing',['Timber_Listing'])
+        self.appendToolbar('TimberBeam',['Timber_Beam'])
+        self.appendToolbar('TimberMachinings',['Timber_MachiningCut'])
         self.appendMenu('TimberTools',['Timber_Repartition','Timber_Tag'])
         self.appendMenu('TimberListing',['Timber_Listing'])
+        self.appendMenu('TimberBeam',['Timber_Beam'])
+        self.appendMenu('TimberBeam',['Timber_MachiningCut'])
         FreeCADGui.addIconPath(":/icons")
         Log ('Loading Timber module... done\n')
+
     def GetClassName(self):
         #return "InfoGui::Workbench"
         return "Gui::PythonWorkbench"

@@ -246,34 +246,50 @@ class Listing():
         #mySheet.clearAll()
         FreeCAD.ActiveDocument.recompute()
         mySheet.set('A1', 'Liste')
-        n=1
+        mySheet.set('A2', 'Date')
+        mySheet.set('B2', 'Projet')
+        mySheet.set('A3','Tag')
+        mySheet.set('B3','Base')
+        mySheet.set('C3','Hauteur')
+        mySheet.set('D3','Longueur')
+        mySheet.set('E3','Quantite')
+        mySheet.set('F3','Volume')
+        voltotal = 0
+        n=3
         for listbytag in self.timberlist:
-            n += 1
-            mySheet.set('A'+str(n), str(listbytag[0]))
-            #print("Tag : " + str(listbytag[0]))
-            n += 1
-            mySheet.set('A'+str(n), "Base : ")
-            #mySheet.set('B'+str(n), str(section[0])+"x"+str(section[1]))
-            mySheet.set('B'+str(n), "Hauteur : ")
-            mySheet.set('C'+str(n), "Longueur : ")
-            mySheet.set('D'+str(n), "Quantite : ")
+            #n += 1
+            mySheet.set('A'+str(n+1), str(listbytag[0]))
+            mergestart = str(n+1)
+            volsection = 0
             for section in listbytag[1]:
-                partBase = str(section[0])
-                partHeight = str(section[1])
-                #print("Section : " + str(section[0])+"x"+str(section[1]))
-                #print("Qte    Longueur")
-                #n += 1
-                #mySheet.set('A'+str(n), "Quantite")
-                #mySheet.set('B'+str(n), "Longueur")
+                voltag = 0
+                partBase = section[0]
+                partHeight = section[1]
                 for debit in section[2]:
                     n += 1
-                    mySheet.set('A'+str(n), partBase)
-                    mySheet.set('B'+str(n), partHeight)
-                    mySheet.set('C'+str(n), str(debit[0]))
-                    mySheet.set('D'+str(n), str(debit[1]))
-                    #print(str(debit[1])+"      "+str(debit[0]))
+                    cellBase = 'B'+str(n)
+                    cellHeigth = 'C'+str(n)
+                    cellLength = 'D'+str(n)
+                    cellQte = 'E'+str(n)
+                    cellVol = 'F'+str(n)
+                    mySheet.set(cellBase , str(partBase))
+                    mySheet.set(cellHeigth , str(partHeight))
+                    mySheet.set(cellLength , str(debit[0]))
+                    mySheet.set(cellQte , str(debit[1]))
+                    voldebit = (partBase * partHeight * debit[0] * debit[1])/1000000000.
+                    mySheet.set(cellVol , str(voldebit))
+                    voltag += voldebit
+                volsection += voltag
+            n += 1
+            mergestop = str(n)
+            mySheet.mergeCells('A' + mergestart + ':' + 'A' + mergestop)
+
+            mySheet.set('F'+str(n),str(volsection))
+            voltotal += volsection
             #print("")
-            FreeCAD.ActiveDocument.recompute()
+        n += 1
+        mySheet.set('F'+str(n),str(voltotal))
+        FreeCAD.ActiveDocument.recompute()
     #def getTaginList(self):
 
     def addListe(self, tag, base, hauteur, longueur):

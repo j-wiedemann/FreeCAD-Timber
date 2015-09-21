@@ -280,8 +280,7 @@ class _TimberBeam(ArchStructure._Structure):
         obj.addProperty("App::PropertyLink","End","Timber","Type of machining at beam end")
         obj.addProperty("App::PropertyLinkList","Machinings","Timber","All machinings of this beam")
         self.Type = "TimberBeam"
-        self.presetslist = TimberComponent.getPresetsList()
-        obj.Preset = self.presetslist
+        obj.Preset = TimberComponent.getPresetsList()
         base = Arch.makeStructure()
         #base.MoveWithHost = True
         base.setEditorMode("Width", 1)
@@ -294,7 +293,7 @@ class _TimberBeam(ArchStructure._Structure):
     def execute(self, obj):
         #print("TimberBeam Start Execute")
         currentpreset = obj.Preset
-        if currentpreset in self.presetslist :
+        if currentpreset in TimberComponent.getPresetsList() :
             obj.Preset = currentpreset
         else:
             obj.Preset = "None"

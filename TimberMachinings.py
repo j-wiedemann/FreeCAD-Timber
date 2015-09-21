@@ -60,7 +60,7 @@ class _CommandTimberMachiningCut:
     def GetResources(self):
         return {'Pixmap'  :  __dir__ + '/icons/Timber_MachiningCut.svg',
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Timber_MachiningCut","MachiningCut"),
-                'Accel': "T, B",
+                'Accel': "T, C",
                 'ToolTip': QtCore.QT_TRANSLATE_NOOP("Timber_MachiningCut","Creates a cut machining to a Timber Beam object, relative to a plane (face)")}
 
     def IsActive(self):

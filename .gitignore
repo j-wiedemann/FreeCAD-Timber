@@ -55,3 +55,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# For my needs
+*.odg

@@ -370,5 +370,16 @@ class _ViewProviderTimberBeam(ArchStructure._ViewProviderStructure):
         FreeCADGui.Control.closeDialog()
         return False
 
+    def onChanged(self,vobj,prop):
+        if prop == "ShowNodes":
+            #self.Object.Base.ViewObject.ShowNodes = True
+            #if hasattr(self,"nodes"):
+            #    vobj.Annotation.removeChild(self.nodes)
+            #    del self.nodes
+            if vobj.ShowNodes:
+                self.Object.Base.ViewObject.ShowNodes = True
+            else:
+                self.Object.Base.ViewObject.ShowNodes = False
+
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Timber_Beam',_CommandTimberBeam())

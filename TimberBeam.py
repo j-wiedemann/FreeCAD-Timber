@@ -47,6 +47,21 @@ if FreeCAD.GuiUp:
 # Possible roles for timber elements
 Roles = ["Beam","Column","Slab","Wall","Curtain Wall","Roof","Foundation","Pile","Tendon"]
 
+def makeTimberBeam2( name = 'TimberBeam' ):
+    base = Arch.makeStructure( None, 1000.0 , 80.0 , 200.0 , 'TBStructure')
+    obj = Arch.makeStructure(base, 1 , 1 , 1 , name)
+    obj.setEditorMode("Length", 1)
+    obj.setEditorMode("Width", 1)
+    obj.setEditorMode("Height", 1)
+    obj.setEditorMode("Placement", 1)
+    return obj
+
+
+
+#        def execute(self, obj):
+            
+    
+
 def makeTimberBeam(length=None, width=None, height=None, name="TimberBeam"):
     '''makeTimberBeam([length],[width],[heigth],[name]): creates a
     timber beam element based on the given profile object and the given
@@ -73,10 +88,6 @@ def makeTimberBeam(length=None, width=None, height=None, name="TimberBeam"):
     else:
         obj.Length = p.GetFloat("BeamLength",1000.)
         #obj.Length = 3500.
-    if height > length:
-        obj.Role = "Column"
-    else:
-        obj.Role = "Beam"
     return obj
 
 
@@ -145,19 +156,8 @@ class _CommandTimberBeam:
             return
         FreeCAD.ActiveDocument.openTransaction(str(translate("Timber","Create Timber Beam")))
         FreeCADGui.addModule("Timber")
-        #if self.Profile:
-        #    pr = Presets[self.Profile]
-        #    FreeCADGui.doCommand('p = Arch.makeProfile('+str(pr[2])+','+str(pr[3])+','+str(pr[4])+','+str(pr[5])+')')
-        #    if self.Length == pr[2]:
-                # vertical
-        #        FreeCADGui.doCommand('s = Arch.makeStructure(p,height='+str(self.Height)+')')
-        #    else:
-                # horizontal
-        #        FreeCADGui.doCommand('s = Arch.makeStructure(p,height='+str(self.Length)+')')
-        #        FreeCADGui.doCommand('s.Placement.Rotation = FreeCAD.Rotation(-0.5,0.5,-0.5,0.5)')
-        #    FreeCADGui.doCommand('s.Profile = "'+pr[1]+'"')
-        #else:
         FreeCADGui.doCommand('s = Timber.makeTimberBeam(length='+str(self.Length)+',width='+str(self.Width)+',height='+str(self.Height)+')')
+        #FreeCADGui.doCommand('s = Timber.makeTimberBeam2()')
         FreeCADGui.doCommand('s.Placement.Base = '+DraftVecUtils.toString(point))
         FreeCADGui.doCommand('s.Placement.Rotation=FreeCAD.DraftWorkingPlane.getRotation().Rotation')
         FreeCAD.ActiveDocument.commitTransaction()
@@ -269,7 +269,119 @@ class _CommandTimberBeam:
         self.vHeight.setText(self.FORMAT % w)
         self.vWidth.setText(self.FORMAT % l)
 
-class _TimberBeam(ArchStructure._Structure):
+class _TimberBeam(ArchComponent.Component):
+    "The Timber Beam object"
+    def __init__(self,obj):
+        ArchComponent.Component.__init__(self,obj)
+        obj.addProperty("App::PropertyLength","Length","1Timber","The length of this element.")
+        obj.addProperty("App::PropertyLength","Width","1Timber","The width of this element.")
+        obj.addProperty("App::PropertyLength","Height","1Timber","The height of this element.")
+        obj.addProperty("App::PropertyEnumeration","Preset","1Timber","Preset parameters for this beam")
+        obj.Preset = TimberComponent.getPresetsList()
+        #obj.addProperty("App::PropertyLinkList","Armatures","Arch","Armatures contained in this element")
+        #obj.addProperty("App::PropertyVector","Normal","Arch","The normal extrusion direction of this object (keep (0,0,0) for automatic normal)")
+        #obj.addProperty("App::PropertyVectorList","Nodes","Arch","The structural nodes of this element")
+        #obj.addProperty("App::PropertyString","Profile","Arch","A description of the standard profile this element is based upon")
+        self.Type = "TBeam"
+        obj.Role = Roles
+        structure = Arch.makeStructure()
+        #structure.setEditorMode("Width", 1)
+        #structure.setEditorMode("Height", 1)
+        #structure.setEditorMode("Length", 1)
+        #structure.setEditorMode("Placement", 1)
+        structure.MoveWithHost = True
+        ArchComponent.addToComponent( obj , structure , "Base" )
+    
+    def execute(self, obj):
+        "creates the structure shape"
+        print("TimberBeam.execute : " + str(obj.Name) )
+        if self.clone(obj):
+            return
+            
+        # creating base shape
+        print("TB Placement : ", obj.Placement)
+        print("Structure Placement : ", obj.Base.Placement)
+        #placement = obj.Placement
+        #if not placement.isNull():
+        #obj.Base.Placement = placement
+        base = obj.Base.Shape.copy()
+        #    obj.Placement = FreeCAD.Placement()
+        #base = None
+        if obj.Base:
+            #obj.Base.Placement = placement
+            #base = obj.Base.Shape.copy()
+            #base = obj.Base.Shape.copy()
+            if base.isNull() :
+                    base = None
+            if base :
+                # treat additions
+                for o in obj.Additions:
+                    if o.isDerivedFrom("Part::Feature"):
+                        if o.Shape:
+                            if not o.Shape.isNull():
+                                if o.Shape.Solids:
+                                    s = o.Shape.copy()
+                                    #if placement:
+                                    #    s.Placement = s.Placement.multiply(placement)
+                                    if base:
+                                        if base.Solids:
+                                            try:
+                                                base = base.fuse(s)
+                                            except Part.OCCError:
+                                                print "Arch: unable to fuse object ",obj.Name, " with ", o.Name
+                                    else:
+                                        base = s
+                # treat subtractions
+                for o in obj.Subtractions:
+                    if o.isDerivedFrom("Part::Feature"):
+                        if o.Shape:
+                            if not o.Shape.isNull():
+                                if o.Shape.Solids and base.Solids:
+                                    s = o.Shape.copy()
+                                    #if placement:
+                                    #   s.Placement = s.Placement.multiply(placement)
+                                    try:
+                                        base = base.cut(s)
+                                    except Part.OCCError:
+                                        print "Arch: unable to cut object ",o.Name, " from ", obj.Name
+
+        obj.Shape = base
+        
+        #obj.Placement = obj.Base.Placement
+        print("TB Placement : ", obj.Placement)
+        print("Structure Placement : ", obj.Base.Placement)
+        
+        
+        #base = None
+        #if obj.Base:
+        #    if obj.Base.isDerivedFrom("Part::Feature"):
+        #        if obj.Base.Shape.isNull():
+        #            return
+        #        if not obj.Base.Shape.isValid():
+        #            if not obj.Base.Shape.Solids:
+        #                # let pass invalid objects if they have solids...
+        #obj.Placement = FreeCAD.Placement()
+        #plBase = obj.Base.Placement
+        #base = obj.Base.Shape.copy()
+        #base = self.processSubShapes(obj,base,plBase)
+        #print("TimberBeam.execute : " + str(obj.Name) )
+        #base = obj.Base.Shape.copy()
+        #                return
+        
+    def onChanged(self,obj,prop):
+        print("TimberBeam.onChanged : " + str(obj.Name) + ' - ' + str(prop))
+        #if prop == 'Placement':
+        #    obj.Base.Placement = obj.Placement
+        #    obj.Placement = FreeCAD.Placement()
+
+    def makeBase(self, obj):
+        base = Arch.makeStructure()
+        base.setEditorMode("Width", 1)
+        base.setEditorMode("Height", 1)
+        base.setEditorMode("Length", 1)
+        base.setEditorMode("Placement", 1)
+        return base
+        """
     "The Structure object"
     def __init__(self,obj):
         #print("TimberBeam Start Init")
@@ -280,6 +392,7 @@ class _TimberBeam(ArchStructure._Structure):
         obj.addProperty("App::PropertyLink","End","Timber","Type of machining at beam end")
         obj.addProperty("App::PropertyLinkList","Machinings","Timber","All machinings of this beam")
         self.Type = "TimberBeam"
+        
         obj.Preset = TimberComponent.getPresetsList()
         base = Arch.makeStructure()
         #base.MoveWithHost = True
@@ -322,7 +435,7 @@ class _TimberBeam(ArchStructure._Structure):
                     obj.Height = presetData[1]
         if prop == "Placement":
             obj.Base.Placement = obj.Placement
-    """
+    
     def getPresetData(self, preset):
         #print("TimberBeam getpresetData")
         #preset = obj.Preset
@@ -334,11 +447,11 @@ class _TimberBeam(ArchStructure._Structure):
         return [width, height]
     """
 
-class _ViewProviderTimberBeam(ArchStructure._ViewProviderStructure):
+class _ViewProviderTimberBeam(ArchComponent.ViewProviderComponent):
     "The Structure ViewProvider object"
     def __init__(self,vobj):
-        ArchStructure._ViewProviderStructure.__init__(self,vobj)
-        vobj.addProperty("App::PropertyBool","ShowChamfer","Timber","If the nodes are visible or not").ShowNodes = False
+        ArchComponent.ViewProviderComponent.__init__(self,vobj)
+        #vobj.addProperty("App::PropertyBool","ShowChamfer","Timber","If the nodes are visible or not").ShowNodes = False
 
     def getIcon(self):
         #import Arch_rc

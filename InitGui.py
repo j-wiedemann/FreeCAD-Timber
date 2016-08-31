@@ -63,11 +63,11 @@ static char * infologo_xpm[] = {
         self.appendToolbar('TimberTools',['Timber_Repartition','Timber_Tag'])
         self.appendToolbar('TimberListing',['Timber_Listing'])
         self.appendToolbar('TimberBeam',['Timber_Beam'])
-        self.appendToolbar('TimberMachinings',['Timber_MachiningCut'])
+        self.appendToolbar('TimberMachinings',['Timber_MachiningCut','Timber_MachiningTenon'])
         self.appendMenu('TimberTools',['Timber_Repartition','Timber_Tag'])
         self.appendMenu('TimberListing',['Timber_Listing'])
         self.appendMenu('TimberBeam',['Timber_Beam'])
-        self.appendMenu('TimberBeam',['Timber_MachiningCut'])
+        self.appendMenu('TimberBeam',['Timber_MachiningCut','Timber_MachiningTenon'])
         FreeCADGui.addIconPath(":/icons")
         Log ('Loading Timber module... done\n')
 

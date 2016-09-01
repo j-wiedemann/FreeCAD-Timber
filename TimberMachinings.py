@@ -268,7 +268,7 @@ class TimberMachiningTenon:
         edg = self.getBeamNodes(obj.Structure)
         face = self.getFace(obj)
         pt = edg.Curve.intersect(face.Surface)
-        print("getIntersectionPoint : ", pt[0][0])
+        print("getIntersectionPoint : ", pt)
         return pt[0][0]
 
     def createPlacement(self, obj):

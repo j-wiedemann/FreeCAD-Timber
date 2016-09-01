@@ -307,6 +307,7 @@ class _TimberBeam(ArchComponent.Component):
         base = obj.Base.Shape.copy()
         #    obj.Placement = FreeCAD.Placement()
         #base = None
+        machinings = False
         if obj.Base:
             #obj.Base.Placement = placement
             #base = obj.Base.Shape.copy()
@@ -327,6 +328,9 @@ class _TimberBeam(ArchComponent.Component):
                                         if base.Solids:
                                             try:
                                                 base = base.fuse(s)
+                                                machinings = True
+                                                if machinings == True :
+                                                    obj.Placement = FreeCAD.Placement()
                                             except Part.OCCError:
                                                 print "Arch: unable to fuse object ",obj.Name, " with ", o.Name
                                     else:
@@ -342,6 +346,9 @@ class _TimberBeam(ArchComponent.Component):
                                     #   s.Placement = s.Placement.multiply(placement)
                                     try:
                                         base = base.cut(s)
+                                        machinings = True
+                                        if machinings == True :
+                                            obj.Placement = FreeCAD.Placement()
                                     except Part.OCCError:
                                         print "Arch: unable to cut object ",o.Name, " from ", obj.Name
 

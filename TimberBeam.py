@@ -332,7 +332,7 @@ class _TimberBeam(ArchComponent.Component):
                                                 if machinings == True :
                                                     obj.Placement = FreeCAD.Placement()
                                             except Part.OCCError:
-                                                print "Arch: unable to fuse object ",obj.Name, " with ", o.Name
+                                                print("Arch: unable to fuse object ",obj.Name, " with ", o.Name)
                                     else:
                                         base = s
                 # treat subtractions
@@ -350,7 +350,7 @@ class _TimberBeam(ArchComponent.Component):
                                         if machinings == True :
                                             obj.Placement = FreeCAD.Placement()
                                     except Part.OCCError:
-                                        print "Arch: unable to cut object ",o.Name, " from ", obj.Name
+                                        print("Arch: unable to cut object ", o.Name, " from ", obj.Name)
 
         obj.Shape = base
         

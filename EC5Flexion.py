@@ -40,7 +40,7 @@ except AttributeError:
 
 class EC5_Poutre():
     def IsActive(self):
-		return bool(FreeCADGui.Selection.getSelectionEx())
+      return bool(FreeCADGui.Selection.getSelectionEx())
 
     def Activated(self):
         app = QtGui.qApp
@@ -59,7 +59,7 @@ class EC5_Poutre():
         #AddEC5Task()
 
     def GetResources(self):
-		return {'Pixmap': 'python', 'MenuText': 'EC5 Poutre', 'ToolTip': 'EC5 Poutre'}
+      return {'Pixmap': 'python', 'MenuText': 'EC5 Poutre', 'ToolTip': 'EC5 Poutre'}
 
 
     def GetArchElementDatas(self):
@@ -128,11 +128,11 @@ class EC5_Poutre():
         kcrit_associe = gui.doubleSpinBox_4.value()
         p.setKcritH(kcrit_associe)
         sigmaMd = round(p.sigmaH(), 3)
-        print sigmaMd
+        print(sigmaMd)
         fmd = round(p.fmd(), 3)
-        print fmd
+        print(fmd)
         tauxTravail = round(p.tauxTravailFlexionH()*100, 0)
-        print tauxTravail
+        print(tauxTravail)
         results_flexion = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -184,11 +184,11 @@ class EC5_Poutre():
         kmod_associe = gui.doubleSpinBox_6.value()
         p.setKmod(kmod_associe)
         tauh = round(p.tauH(), 3)
-        print tauh
+        print(tauh)
         fvd = round(p.fvd(),3)
-        print fvd
+        print(fvd)
         tauxTravail = round(p.tauxTravailCisaillement()*100, 0)
-        print tauxTravail
+        print(tauxTravail)
         results_flexion = ("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

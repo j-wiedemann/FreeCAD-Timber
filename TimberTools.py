@@ -95,7 +95,7 @@ class _AddTagTaskPanel:
         #self.previewCutVolume(self.combobox.currentIndex())
 
     def setTag(self,item):
-        print "setText"
+        print("setText")
         self.linedit.setText(str(item.text()))
 
     def accept(self):

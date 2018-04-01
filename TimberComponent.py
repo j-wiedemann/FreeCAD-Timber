@@ -270,7 +270,7 @@ class TimberBeamTaskPanel:
                 if it.text(0) == getattr(self,"tree"+a).text(0):
                     mod = a
             if mod == "Machinings":
-                print "TODO : Add Machinings"
+                print("TODO : Add Machinings")
             else :
                 for o in FreeCADGui.Selection.getSelection():
                     ArchComponent.addToComponent(self.obj,o,mod)
@@ -457,7 +457,7 @@ def processSubShapes(obj,base,placement=None):
                                             base.Placement = FreeCAD.Placement()
                                             base = base.fuse(s)
                                         except Part.OCCError:
-                                            print "Arch: unable to fuse object ",obj.Name, " with ", o.Name
+                                            print("Arch: unable to fuse object ",obj.Name, " with ", o.Name)
                                 else:
                                     base = s
 
@@ -496,7 +496,7 @@ def processSubShapes(obj,base,placement=None):
                                     base.Placement = FreeCAD.Placement()
                                     base = base.cut(s)
                                 except Part.OCCError:
-                                    print "Arch: unable to cut object ",o.Name, " from ", obj.Name
+                                    print("Arch: unable to cut object ",o.Name, " from ", obj.Name)
 
     #print("processSubShapes End")
     return base

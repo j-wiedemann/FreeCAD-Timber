@@ -55,7 +55,7 @@ def addTag(objects,tag):
         try:
             obj.Tag = tag
         except AttributeError:
-            print "Cet objet n'est pas tagable"
+            print("Cet objet n'est pas tagable")
 
 class _CommandAddTag:
     "the Timber Repartition command definition"

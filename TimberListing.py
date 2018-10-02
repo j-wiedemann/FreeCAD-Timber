@@ -163,7 +163,7 @@ class _ListingTaskPanel:
         export = []
         for item in self.taglistwidget.selectedItems():
             items.append(item.text())
-        print items
+        print(items)
         objlist = listingfilter(items)
         if self.checkSpreadsheet.isChecked() :
             export.append("Spreadsheet")

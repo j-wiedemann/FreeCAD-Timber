@@ -55,7 +55,7 @@ def addTag(objects,tag):
         try:
             obj.Tag = tag
         except AttributeError:
-            print "Cet objet n'est pas tagable"
+            print("Cet objet n'est pas tagable")
 
 class _CommandAddTag:
     "the Timber Repartition command definition"
@@ -95,7 +95,7 @@ class _AddTagTaskPanel:
         #self.previewCutVolume(self.combobox.currentIndex())
 
     def setTag(self,item):
-        print "setText"
+        print("setText")
         self.linedit.setText(str(item.text()))
 
     def accept(self):

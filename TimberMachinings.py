@@ -278,7 +278,7 @@ class TimberMachiningTenon:
         pl = FreeCAD.Placement()
         pl.Base = base
         pl.Rotation = rot
-        print pl
+        print(pl)
         return pl
 
     def createTenon(self, obj):

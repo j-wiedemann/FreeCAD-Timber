@@ -1,4 +1,4 @@
-# FreeCAD-Timber
+# FreeCAD Timber Workbench
 A Timber module for FreeCAD
 
 Hello,
@@ -20,3 +20,28 @@ The only interesting feature in my opinion is the Timber listing tool which gene
 What do you think of that? Are there any users of this workbench ? Geek: 
 
 You can install this workbennch via https://github.com/FreeCAD/FreeCAD-addons#installing
+
+
+## Screenshots 
+![image](https://user-images.githubusercontent.com/4140247/59509848-3228bf00-8e80-11e9-8be9-aa457fde7e63.png)
+
+
+## Installation
+You can install this workbench via the FreeCAD built-in [Addon Manager](https://github.com/FreeCAD/FreeCAD-addons#1-builtin-addon-manager)
+
+
+## Feedback
+Give feedback to the author via the dedicated FreeCAD [thread discussing Timber workbench](https://forum.freecadweb.org/viewtopic.php?t=12559)  
+
+
+## Known Limitations
+* Not Python3 compatible yet  
+* Not actively in development  
+
+
+## Author
+[@wood-galaxy](https://github.com/wood-galaxy)
+
+
+## License
+GNU General Public License v2.0
